@@ -3,7 +3,7 @@ const express = require("express");
 const User = require("./models/User");
 
 const jwt = require("jsonwebtoken");
-const jwtSecret = "secret";
+
 
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
@@ -15,65 +15,46 @@ const mongoose = require("mongoose");
 
 
 const cors = require('cors')
+
+
+
 const app = express();
 
-
 const bcryptSalt = bcrypt.genSaltSync(10);
-
-console.log("App is starting");
-app.listen(3000);
-
-
-app.use(express.urlencoded({ extended: false, useUnifiedTopology: true }));
+const jwtSecret = 'fasefraw4r5r3wq45wdfgw34twdfg';
 
 
 app.use(express.json());
 app.use(cookieParser());
 
-
-
-
 app.use(cors({
-
   credentials: true,
-  origin: 'http://localhost:3000'
-}))
-
-// connect to mongodb
-
-mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
-// login and sign up
+  origin: 'http://127.0.0.1:5173',
+}));
 
 
 
 
 app.get("/", async (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Guesthouse management System</title>
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-    </head>
-    <body>
-      Hello World 1254
-      
-    </body>
-    </html>
-    `);
+  mongoose.connect(process.env.MONGO_URL);
+  res.json('test ok');
 });
 
 
 
 app.post('/register', async (req, res) => {
-  
+
+
+  mongoose.connect(process.env.MONGO_URL);
+
+ 
+
+  console.log("hello");
   
   const { name, email, password } = req.body;
   // console.log(name);
   try {
-    const UserDoc = await User.create({
+    const userDoc = await User.create({
       name,
       email,
       password: bcrypt.hashSync(password, bcryptSalt)
@@ -90,6 +71,7 @@ app.post('/register', async (req, res) => {
 
 
 app.post('/login', async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
 
   const { email, password } = req.body;
   const userDoc = await User.findOne({ email });
@@ -120,29 +102,34 @@ app.post('/login', async (req, res) => {
     }
   }
 });
+app.listen(4000);
 
 
-app.get('/profile',(req,res)=>{
 
-  const {token} = req.cookies;
+console.log("Server is running on port 4000");
 
-  if(token){
+// app.get('/profile',(req,res)=>{
+//  mongoose.connect(process.env.MONGO_URL);
 
-      jwt.verify(token, jwtSecret,{}, async(err, userData) => {
-          if(err){
-              throw err;
-          }
-          else{
-            const {name,email,_id} = await User.findById(userData.id)
+//   const {token} = req.cookies;
 
-              res.json({name,email,_id});
-          }
-      })
-  }
-  else
-  {
-    res.json(null);
-  }
+//   if(token){
 
-  res.json({token});
-})
+//       jwt.verify(token, jwtSecret,{}, async(err, userData) => {
+//           if(err){
+//               throw err;
+//           }
+//           else{
+//             const {name,email,_id} = await User.findById(userData.id)
+
+//               res.json({name,email,_id});
+//           }
+//       })
+//   }
+//   else
+//   {
+//     res.json(null);
+//   }
+
+//   res.json({token});
+// })
