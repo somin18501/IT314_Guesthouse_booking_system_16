@@ -4,7 +4,7 @@ const User = require("./models/User");
 const imagedownloader = require("image-downloader");
 const jwt = require("jsonwebtoken");
 const multer = require('multer');
-
+const isValidEmail = require("./utilsCheck/emailValidator");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
@@ -54,6 +54,7 @@ app.post('/register', async (req, res) => {
   console.log("hello");
   
   const { name, email, password } = req.body;
+
   // console.log(name);
   try {
     const userDoc = await User.create({
@@ -140,3 +141,5 @@ app.listen(4000);
 
 
 console.log("Server is running on port 4000");
+
+module.exports = app;
