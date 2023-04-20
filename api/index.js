@@ -4,7 +4,7 @@ const User = require("./models/User");
 const imagedownloader = require("image-downloader");
 const jwt = require("jsonwebtoken");
 const multer = require('multer');
-const isValidEmail = require("./utilsCheck/emailValidator");
+
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
@@ -26,8 +26,6 @@ const jwtSecret = 'fasefraw4r5r3wq45wdfgw34twdfg';
 
 app.use(express.json());
 app.use(cookieParser());
-
-
 app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(cors({
   credentials: true,
@@ -51,10 +49,9 @@ app.post('/register', async (req, res) => {
 
  
 
-  console.log("hello");
+  
   
   const { name, email, password } = req.body;
-
   // console.log(name);
   try {
     const userDoc = await User.create({
@@ -141,5 +138,3 @@ app.listen(4000);
 
 
 console.log("Server is running on port 4000");
-
-module.exports = app;
