@@ -9,6 +9,9 @@ export default function PlacesFormPage(){
     const {id} = useParams();
     const [title,setTitle] = useState('');
     const [address,setAddress] = useState('');
+    const [city,setCity] = useState('');
+    const [state,setState] = useState('');
+    const [country,setCountry] = useState('');
     const [addedPhotos,setAddedPhotos] = useState([]);
     const [description,setDescription] = useState('');
     const [perks,setPerks] = useState([]);
@@ -27,6 +30,9 @@ export default function PlacesFormPage(){
             const {data} = response;
             setTitle(data.title);
             setAddress(data.address);
+            setCity(data.city);
+            setState(data.state);
+            setCountry(data.country);
             setAddedPhotos(data.photos);
             setDescription(data.description);
             setPerks(data.perks);
@@ -64,8 +70,8 @@ export default function PlacesFormPage(){
     async function savePlace(ev){
         ev.preventDefault();
         const placeData = {
-            title, address, addedPhotos, 
-            description, perks, extraInfo, 
+            title, address, city, state, country,
+            addedPhotos, description, perks, extraInfo, 
             checkIn, checkOut, maxGuests, price,
         };
         if(id){ 
@@ -76,6 +82,13 @@ export default function PlacesFormPage(){
         }else{
             // new place place
             await axios.post('/places', placeData);
+            setRedirect(true);
+        }
+    }
+
+    async function removeHouse(){
+        if(confirm("Sure? want to Remove Guest House") == true){
+            const response = await axios.delete('/deleteplace/'+id);
             setRedirect(true);
         }
     }
@@ -99,7 +112,25 @@ export default function PlacesFormPage(){
                         value={address}
                         onChange={ev => setAddress(ev.target.value)}
                         placeholder="address" />
+
+                {preInput('City','City to your Residence')}
+                <input type="text" 
+                        value={city}
+                        onChange={ev => setCity(ev.target.value)}
+                        placeholder="city" />
                 
+                {preInput('State','State to your Residence')}
+                <input type="text" 
+                        value={state}
+                        onChange={ev => setState(ev.target.value)}
+                        placeholder="state" />
+
+                {preInput('Country','Country to your Residence')}
+                <input type="text" 
+                        value={country}
+                        onChange={ev => setCountry(ev.target.value)}
+                        placeholder="country" />
+
                 {preInput('Photos','Display your eminities')}
                 <PhotosUploader addedPhotos={addedPhotos} onChange={setAddedPhotos}/>
 
@@ -148,6 +179,9 @@ export default function PlacesFormPage(){
 
                 <button className="primary my-4">Save</button>
             </form>
+            {id && (
+                <button className="primary my-4" onClick={removeHouse}>Remove</button>
+            )}
         </div>
     );
 }

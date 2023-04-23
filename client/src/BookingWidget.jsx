@@ -3,7 +3,7 @@ import { differenceInCalendarDays } from "date-fns";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
 import { UserContext } from "./UserContext";
-
+// import { useParams } from "react-router-dom";
 export default function BookingWidget({place}){
     const [checkIn,setCheckIn] = useState('');
     const [checkOut,setCheckOut] = useState('');
@@ -11,8 +11,10 @@ export default function BookingWidget({place}){
     const [name,setName] = useState('');
     const [phone,setPhone] = useState('');
     const [redirect,setRedirect] = useState('');
+    const {user} = useContext(UserContext);
+    // const {id} = useParams();
     
-    // const {user} = useContext(UserContext);
+    // No why it is not working
     // useEffect(()=>{
     //     if(user){
     //         setName(user.name);
@@ -25,11 +27,22 @@ export default function BookingWidget({place}){
     } 
 
     async function bookThisPlace(){
-        const response = await axios.post('/bookings',{checkIn,checkOut,numOfGuests,name,phone,place:place._id,
-            price:(numberOfNights * place.price * Math.ceil(numOfGuests/place.maxGuests))
-        });
-        const bookingId = response.data._id;
-        setRedirect(`/account/bookings/${bookingId}`);
+
+        if(user !== null){
+            if(checkIn.length == 0 || checkOut.length == 0 || numOfGuests.length == 0 || name.length == 0 || phone.length == 0){
+                alert('please enter all the details')
+                redirect(`/place/${id}`)
+            }
+            const response = await axios.post('/bookings',{checkIn,checkOut,numOfGuests,name,phone,place:place._id,
+                price:(numberOfNights * place.price * Math.ceil(numOfGuests/place.maxGuests))
+            });
+            const bookingId = response.data._id;
+            setRedirect(`/account/bookings/${bookingId}`);
+        }
+        else{
+            alert('Please Login!');
+            setRedirect(`/`);
+        }
     }
 
     if(redirect){
