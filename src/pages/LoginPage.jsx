@@ -11,9 +11,17 @@ export default function LoginPage(){
     async function handleLoginSubmit(ev){
         ev.preventDefault();
         try{
-            const {data} = await axios.post('/login', {email,password});
-            setUser(data);
-            alert('Login successfull!');
+            if(email.length === 0 || password.length === 0){
+                alert('Incorrect Password or Username');
+            } else{
+                const {data} = await axios.post('/login', {email,password});
+                if(data === "not found"){
+                    alert('Incorrect Password or Username');
+                } else{
+                    setUser(data);
+                    alert('Login successfull!');
+                }
+            }
             setRedirect(true);
         }catch(e){
             alert('Login failed!!');

@@ -1,12 +1,14 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { format, differenceInCalendarDays } from "date-fns";
 
 export default function BookingPage(){
     const {id} = useParams();
     const [booking,setBooking] = useState(null);
     const [showAll,setShowAll] = useState(false);
+    const [currDate,setCurrDate] = useState('');
+    const [redirect,setRedirect] = useState(false);
     useEffect(()=>{
         if(!id){
             return;
@@ -14,7 +16,22 @@ export default function BookingPage(){
         axios.get('/bookings/'+id).then(response => {
             setBooking(response.data)
         })
+        let ts = Date.now();
+        let date_time = new Date(ts);
+        let date = date_time.getDate();
+        let month = date_time.getMonth() + 1;
+        let year = date_time.getFullYear();
+        setCurrDate(year + "-" + month + "-" + date);
     }, [id]);
+
+    async function cancelBooking(){
+        if(confirm("Sure? want to Cancel Booking") == true){
+            const response = await axios.delete('/deletebooking/'+id);
+            setRedirect(`/account/bookings`);
+        }
+    }
+
+    if(redirect) return <Navigate to={redirect}/>
 
     // doubt of about this line
     if(!booking) return '';
@@ -44,11 +61,11 @@ export default function BookingPage(){
     return (
         <div className="my-8"> 
             <h1 className="text-3xl">{booking.place.title}</h1>
-            <a className="flex gap-1 my-2 block font-semibold underline" target="_blank" href={'https://maps.google.com/?q='+booking.place.address}>
+            <a className="flex gap-1 my-2 block font-semibold underline" target="_blank" href={'https://maps.google.com/?q='+booking.place.title+', '+booking.place.address+', '+booking.place.city+', '+booking.place.state+', '+booking.place.country}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
                     <path fill-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
                 </svg>
-                {booking.place.address}
+                {booking.place.address+", "+booking.place.city+", "+booking.place.state+", "+booking.place.country}
             </a>
             <div className="bg-gray-200 p-6 my-6 rounded-2xl">
                 <h2 className="flex justify-center font-bold text-xl mb-2">Your booking information</h2>
@@ -120,6 +137,11 @@ export default function BookingPage(){
                     </svg>
                     Show All
                 </button>
+            </div>
+            <div className="mt-6">
+                {differenceInCalendarDays(new Date(booking.checkIn), new Date(currDate))>1 && (
+                    <button className="primary" onClick={cancelBooking}>Cancel</button>
+                )}
             </div>
         </div>
     );

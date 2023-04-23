@@ -11,6 +11,9 @@ textarea{
 textarea{
     height: 140px;
 }
+input[type="search"]{
+    @apply w-full py-1 px-1 rounded-xl;
+}
 button{
     @apply bg-gray-300;
 }
