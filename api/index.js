@@ -20,6 +20,93 @@ const cors = require('cors')
 
 const app = express();
 
+
+let { google } = require("googleapis");
+let path = require("path");
+// let fs = require("fs");
+const { file } = require("googleapis/build/src/apis/file");
+let CLIENT_ID =
+  "864785856564-r3lg3kfi0gmaa6i53kd89j41ahofr706.apps.googleusercontent.com";
+let CLIENT_SECRET = "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";
+let REDIRECT_URI = "https://developers.google.com/oauthplayground/";
+let REFRESH_TOKEN =
+  "1//04EkoHi8WuGt3CgYIARAAGAQSNwF-L9IrMNAAZNtusKbnS9AWUdSpPI77lNVyGQ2YEGdjMGvK6rqJytFHZePObYmRwOFQnOgL2qc";
+
+const oauth2client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
+
+oauth2client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+const drive = google.drive({
+  version: "v3",
+  auth: oauth2client,
+});
+
+// works perfectly
+let uploadids;
+async function uploadfile(filepath) {
+  console.log(filepath);
+  if (path.extname(filepath) == ".png") {
+    try {
+      const response = await drive.files.create({
+        requestBody: {
+          name: "uploadedfile1.png",
+          mimeType: "image/png",
+        },
+        media: {
+          mimeType: "image/png",
+          body: fs.createReadStream(filepath),
+        },
+      });
+      uploadids = response.data.id;
+      console.log(response.data);
+    } catch (e) {
+      console.log(e.message);
+    }
+  } else if (path.extname(filepath) == ".jpg") {
+    try {
+      const response = await drive.files.create({
+        requestBody: {
+          name: "uploadedfile1.jpg",
+          mimeType: "image/jpg",
+        },
+        media: {
+          mimeType: "image/jpg",
+          body: fs.createReadStream(filepath),
+        },
+      });
+      uploadids = response.data.id;
+      console.log(response.data);
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+}
+
+async function generatepublicurl(id) {
+  try {
+    const fileId = id;
+    await drive.permissions.create({
+      fileId: fileId,
+      requestBody: {
+        role: "reader",
+        type: "anyone",
+      },
+    });
+
+    const result = await drive.files.get({
+      fileId: fileId,
+      fields: "webViewLink, webContentLink",
+    });
+    console.log(result.data);
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
 const bcryptSalt = bcrypt.genSaltSync(10);
 const jwtSecret = 'fasefraw4r5r3wq45wdfgw34twdfg';
 
