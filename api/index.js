@@ -335,6 +335,7 @@ app.get('/bookings',(req,res)=>{
   });
 })
 
+
 app.get("/bookings/:id", async (req, res) => {
   const { id } = req.params;
   res.json(await Booking.findById(id).populate('place'));
