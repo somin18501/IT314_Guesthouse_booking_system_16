@@ -15,6 +15,8 @@ import BookingPage from './pages/BookingPage'
 import FilteredPage from './pages/FilteredPage'
 
 axios.defaults.baseURL = 'http://127.0.0.1:4000';
+
+// axios.defaults.baseURL = process.env.REACT_APP_URl;
 axios.defaults.withCredentials = true;
 
 
