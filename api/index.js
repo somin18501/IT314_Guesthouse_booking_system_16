@@ -1,37 +1,128 @@
-const { urlencoded } = require("express");
 const express = require("express");
-const User = require("./models/User");
-const imagedownloader = require("image-downloader");
-const jwt = require("jsonwebtoken");
-const multer = require('multer');
-const bcrypt = require("bcryptjs");
+const cors = require("cors");
 const mongoose = require("mongoose");
-const cors = require('cors')
-const bcryptSalt = bcrypt.genSaltSync(10);
-const jwtSecret = 'fasefraw4r5r3wq45wdfgw34twdfg';
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("./models/User.js");
+const Place = require("./models/Place.js");
+const Booking = require("./models/Booking.js");
 const cookieParser = require("cookie-parser");
-const Place = require('./models/place.js');
-const Booking = require('./models/Booking.js');
-const fs = require('fs');
-
+const imageDownloader = require("image-downloader");
+const multer = require("multer");
+const fs = require("fs");
 require("dotenv").config();
 const app = express();
-app.use(express.json());
+
+
+let { google } = require("googleapis");
+let path = require("path");
+// let fs = require("fs");
+const { file } = require("googleapis/build/src/apis/file");
+let CLIENT_ID =
+  "864785856564-r3lg3kfi0gmaa6i53kd89j41ahofr706.apps.googleusercontent.com";
+let CLIENT_SECRET = "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";
+let REDIRECT_URI = "https://developers.google.com/oauthplayground/";
+let REFRESH_TOKEN =
+  "1//04EkoHi8WuGt3CgYIARAAGAQSNwF-L9IrMNAAZNtusKbnS9AWUdSpPI77lNVyGQ2YEGdjMGvK6rqJytFHZePObYmRwOFQnOgL2qc";
+
+const oauth2client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
+
+oauth2client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+const drive = google.drive({
+  version: "v3",
+  auth: oauth2client,
+});
+
+// works perfectly
+let uploadids;
+async function uploadfile(filepath) {
+  console.log(filepath);
+  if (path.extname(filepath) == ".png") {
+    try {
+      const response = await drive.files.create({
+        requestBody: {
+          name: "uploadedfile1.png",
+          mimeType: "image/png",
+        },
+        media: {
+          mimeType: "image/png",
+          body: fs.createReadStream(filepath),
+        },
+      });
+      uploadids = response.data.id;
+      console.log(response.data);
+    } catch (e) {
+      console.log(e.message);
+    }
+  } else if (path.extname(filepath) == ".jpg") {
+    try {
+      const response = await drive.files.create({
+        requestBody: {
+          name: "uploadedfile1.jpg",
+          mimeType: "image/jpg",
+        },
+        media: {
+          mimeType: "image/jpg",
+          body: fs.createReadStream(filepath),
+        },
+      });
+      uploadids = response.data.id;
+      console.log(response.data);
+    } catch (e) {
+      console.log(e.message);
+    }
+  }
+}
+
+async function generatepublicurl(id) {
+  try {
+    const fileId = id;
+    await drive.permissions.create({
+      fileId: fileId,
+      requestBody: {
+        role: "reader",
+        type: "anyone",
+      },
+    });
+
+    const result = await drive.files.get({
+      fileId: fileId,
+      fields: "webViewLink, webContentLink",
+    });
+    console.log(result.data);
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+
+
+
+
+const bcryptSalt = bcrypt.genSaltSync(10);
+const jwtSecret = "bjhfewf74926966jheufuf";
+
+app.use(express.json()); // to parse the json to read data
 app.use(cookieParser());
-app.use('/uploads', express.static(__dirname + '/uploads'));
-app.use(cors());
-
-
+app.use("/uploads", express.static(__dirname + "/uploads"));
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL,
+  })
+);
 
 mongoose.connect(process.env.MONGO_URL);
 
-app.get("/test", async (req, res) => {
-  // console.log(process.env.API_URL);
-  mongoose.connect(process.env.MONGO_URL);
-  res.json('test ok');
+app.get("/test", (req, res) => {
+  res.json("test ok");
 });
-
-
 
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
@@ -97,22 +188,26 @@ app.post("/upload-by-link", async (req, res) => {
   const newName = "photo" + Date.now() + ".jpg";
   await imageDownloader.image({
     url: link,
-    dest: __dirname + "/uploads/" + newName,
+    dest: '/tmp/' + newName,
   });
-  res.json(newName);
+  await uploadfile('E:\\tmp\\'+newName);
+  await generatepublicurl(uploadids);
+  res.json(uploadids);
 });
 
-const photosMiddleware = multer({ dest: "uploads/" });
-app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
+const photosMiddleware = multer({ dest: "/tmp" });
+app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
   // console.log(req.files); // used to gt response in terminal
   const uploadedFiles = [];
   for (let i = 0; i < req.files.length; i++) {
     const { path, originalname } = req.files[i];
     const parts = originalname.split(".");
     const ext = parts[parts.length - 1];
-    const newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
-    uploadedFiles.push(newPath.replace("uploads\\", ""));
+    const newName = path + "." + ext;
+    fs.renameSync(path, newName);
+    await uploadfile('E:'+newName);
+    await generatepublicurl(uploadids);
+    uploadedFiles.push(uploadids);
   }
   res.json(uploadedFiles);
 });
@@ -122,16 +217,16 @@ app.post("/places", (req, res) => {
   const {
     title, address, city, state, country,
     addedPhotos, description, perks, extraInfo,
-    checkIn, checkOut, maxGuests, price,
+    checkIn, checkOut, maxGuests, price, status,
   } = req.body;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const placeDoc = await Place.create({
-      owner: userData.id, title, address,
+      owner: userData.id, title, address, 
       city, state, country,
       photos: addedPhotos, description,
       perks, extraInfo, checkIn,
-      checkOut, maxGuests, price,
+      checkOut, maxGuests, price, status,
     });
     res.json(placeDoc);
   });
@@ -153,9 +248,9 @@ app.get("/places/:id", async (req, res) => {
 app.put("/places", async (req, res) => {
   const { token } = req.cookies;
   const {
-    id, title, address, city, state, country,
+    id, title, address, city, state, country, 
     addedPhotos, description, perks, extraInfo,
-    checkIn, checkOut, maxGuests, price,
+    checkIn, checkOut, maxGuests, price, status,
   } = req.body;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
@@ -166,8 +261,8 @@ app.put("/places", async (req, res) => {
     if (userData.id === placeDoc.owner.toString()) {
       placeDoc.set({
         title, address, city, state, country,
-        photos: addedPhotos, description, perks,
-        extraInfo, checkIn, checkOut, maxGuests, price,
+        photos: addedPhotos, description, perks, extraInfo,
+        checkIn, checkOut, maxGuests, price, status,
       });
       await placeDoc.save();
       res.json("ok");
@@ -175,52 +270,62 @@ app.put("/places", async (req, res) => {
   });
 });
 
-app.delete('/deleteplace/:id', async (req, res) => {
-  try {
-    res.json(await Place.findByIdAndDelete(req.params.id));
-  } catch (err) {
-    res.send('Error')
+app.put("/places/feedback", async (req, res) => {
+  const { placeId, feedback, } = req.body;
+  const placeDoc = await Place.findById(placeId);
+  placeDoc.set({
+    feedback,
+  });
+  await placeDoc.save();
+  res.json("ok");
+});
+
+app.delete('/deleteplace/:id', async(req,res)=>{
+  try{
+      res.json(await Place.findByIdAndDelete(req.params.id));
+  }catch(err){
+      res.send('Error')
   }
 })
 
-app.get("/places", async (req, res) => {
-  const { city, state, country } = req.query;
+app.get("/places", async (req,res) => {
+  const {city, state, country} = req.query;
   const queryObject = {};
 
-  if (city) {
-    queryObject.city = { $regex: city, $options: "i" };
+  if(city){
+    queryObject.city = {$regex: city, $options: "i"};
   }
 
-  if (state) {
-    queryObject.state = { $regex: state, $options: "i" };
+  if(state){
+    queryObject.state = {$regex: state, $options: "i"};
   }
 
-  if (country) {
-    queryObject.country = { $regex: country, $options: "i" };
+  if(country){
+    queryObject.country = {$regex: country, $options: "i"};
   }
   res.json(await Place.find(queryObject));
 })
 
-app.get('/places', async (req, res) => {
-  res.json(await Place.find())
+app.get('/places',async (req,res)=>{
+  res.json(await Place.find());
 });
 
 // here we can using .then() instead of async-await as substitute
-app.post('/bookings', (req, res) => {
+app.post('/bookings', (req,res) => {
   const { token } = req.cookies;
-  const { place, checkIn, checkOut, numOfGuests,
-    name, phone, price, } = req.body;
+  const {place,checkIn,checkOut,numOfGuests,
+         name,phone,price,} = req.body;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const bookingDoc = await Booking.create({
-      user: userData.id, place, checkIn, checkOut,
-      numOfGuests, name, phone, price,
+      user: userData.id, place,checkIn,checkOut,
+      numOfGuests,name,phone,price,
     });
     res.json(bookingDoc);
   });
 });
 
-app.get('/bookings', (req, res) => {
+app.get('/bookings',(req,res)=>{
   const { token } = req.cookies;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     const { id } = userData;
@@ -234,15 +339,12 @@ app.get("/bookings/:id", async (req, res) => {
   res.json(await Booking.findById(id).populate('place'));
 });
 
-app.delete('/deletebooking/:id', async (req, res) => {
-  try {
-    res.json(await Booking.findByIdAndDelete(req.params.id));
-  } catch (err) {
-    res.send('Error')
+app.delete('/deletebooking/:id', async(req,res)=>{
+  try{
+      res.json(await Booking.findByIdAndDelete(req.params.id));
+  }catch(err){
+      res.send('Error')
   }
 })
 
-app.listen(process.env.PORT || 4000);
-
-console.log("Server is running on port 4000");
-module.exports = app;
+app.listen(4000);

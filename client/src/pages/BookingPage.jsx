@@ -50,7 +50,7 @@ export default function BookingPage(){
                     </div>
                     {booking.place?.photos?.length > 0 && booking.place.photos.map(photo=>(
                         <div>
-                            <img src={'http://localhost:4000/uploads/'+photo} alt="" />
+                            <img src={'https://drive.google.com/uc?id='+photo} alt="" />
                         </div>
                     ))}
                 </div>
@@ -112,22 +112,22 @@ export default function BookingPage(){
                 <div className="grid gap-2 grid-cols-[1fr_1fr] rounded-2xl overflow-hidden">
                     <div>
                         {booking.place.photos?.[0] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+booking.place.photos[0]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+booking.place.photos[0]} alt="" />
                         )}
                     </div>
                     <div>
                         {booking.place.photos?.[1] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+booking.place.photos[1]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+booking.place.photos[1]} alt="" />
                         )}
                     </div>
                     <div>
                         {booking.place.photos?.[2] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+booking.place.photos[2]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+booking.place.photos[2]} alt="" />
                         )}
                     </div>
                     <div>
                         {booking.place.photos?.[3] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+booking.place.photos[3]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+booking.place.photos[3]} alt="" />
                         )}
                     </div>
                 </div>

@@ -54,22 +54,22 @@ export default function PlacePage(){
                 <div className="grid gap-2 grid-cols-[1fr_1fr] rounded-2xl overflow-hidden">
                     <div>
                         {place.photos?.[0] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+place.photos[0]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
                         )}
                     </div>
                     <div>
                         {place.photos?.[1] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+place.photos[1]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+place.photos[1]} alt="" />
                         )}
                     </div>
                     <div>
                         {place.photos?.[2] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+place.photos[2]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+place.photos[2]} alt="" />
                         )}
                     </div>
                     <div>
                         {place.photos?.[3] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+place.photos[3]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+place.photos[3]} alt="" />
                         )}
                     </div>
                 </div>

@@ -25,6 +25,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "fs": "0.0.1-security",
+    "googleapis": "^118.0.0",
     "image-downloader": "^4.3.0",
     "jsonwebtoken": "^9.0.0",
     "loader": "^2.1.1",
