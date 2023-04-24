@@ -204,8 +204,48 @@ app.put("/places", async (req, res) => {
   });
 });
 
+
+app.get('/places',async (req,res)=>{
+  res.json(await Place.find());
+});
+
+// here we can using .then() instead of async-await as substitute
+app.post('/bookings', (req,res) => {
+  const { token } = req.cookies;
+  const {place,checkIn,checkOut,numOfGuests,
+         name,phone,price,} = req.body;
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) throw err;
+    const bookingDoc = await Booking.create({
+      user: userData.id, place,checkIn,checkOut,
+      numOfGuests,name,phone,price,
+    });
+    res.json(bookingDoc);
+  });
+});
+
+app.get('/bookings',(req,res)=>{
+  const { token } = req.cookies;
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    const { id } = userData;
+    // populate is used to get entire object referenced by calling model 
+    res.json(await Booking.find({ user: id }).populate('place'));
+  });
+})
+
+app.get("/bookings/:id", async (req, res) => {
+  const { id } = req.params;
+  res.json(await Booking.findById(id).populate('place'));
+});
+
+app.delete('/deletebooking/:id', async(req,res)=>{
+  try{
+      res.json(await Booking.findByIdAndDelete(req.params.id));
+  }catch(err){
+      res.send('Error')
+  }
+})
+
 app.listen(4000);
-
-
 
 console.log("Server is running on port 4000");
