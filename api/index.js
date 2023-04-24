@@ -203,7 +203,41 @@ app.put("/places", async (req, res) => {
     }
   });
 });
+app.put("/places/feedback", async (req, res) => {
+  const { placeId, feedback, } = req.body;
+  const placeDoc = await Place.findById(placeId);
+  placeDoc.set({
+    feedback,
+  });
+  await placeDoc.save();
+  res.json("ok");
+});
 
+app.delete('/deleteplace/:id', async(req,res)=>{
+  try{
+      res.json(await Place.findByIdAndDelete(req.params.id));
+  }catch(err){
+      res.send('Error')
+  }
+})
+
+app.get("/places", async (req,res) => {
+  const {city, state, country} = req.query;
+  const queryObject = {};
+
+  if(city){
+    queryObject.city = {$regex: city, $options: "i"};
+  }
+
+  if(state){
+    queryObject.state = {$regex: state, $options: "i"};
+  }
+
+  if(country){
+    queryObject.country = {$regex: country, $options: "i"};
+  }
+  res.json(await Place.find(queryObject));
+})
 
 app.get('/places',async (req,res)=>{
   res.json(await Place.find());
