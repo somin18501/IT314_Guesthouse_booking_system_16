@@ -14,7 +14,7 @@ import BookingsPage from './pages/BookingsPage'
 import BookingPage from './pages/BookingPage'
 import FilteredPage from './pages/FilteredPage'
 
-axios.defaults.baseURL = 'http://127.0.0.1:4000';
+axios.defaults.baseURL = 'https://api-c63z.onrender.com';
 axios.defaults.withCredentials = true;
 
 function App() {
