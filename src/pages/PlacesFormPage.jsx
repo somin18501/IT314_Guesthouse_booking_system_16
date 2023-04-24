@@ -20,6 +20,7 @@ export default function PlacesFormPage(){
     const [checkOut,setCheckOut] = useState('');
     const [maxGuests,setMaxGuests] = useState(1);
     const [price,setPrice] = useState(1000);
+    const [status,setStatus] = useState(true);
     const [redirect,setRedirect] = useState(false);
     
     useEffect(()=>{
@@ -41,6 +42,7 @@ export default function PlacesFormPage(){
             setCheckOut(data.checkOut);
             setMaxGuests(data.maxGuests);
             setPrice(data.price);
+            setStatus(data.status);
         });
     },[id]);
 
@@ -72,7 +74,7 @@ export default function PlacesFormPage(){
         const placeData = {
             title, address, city, state, country,
             addedPhotos, description, perks, extraInfo, 
-            checkIn, checkOut, maxGuests, price,
+            checkIn, checkOut, maxGuests, price, status,
         };
         if(id){ 
             // update place with given id
@@ -144,6 +146,12 @@ export default function PlacesFormPage(){
 
                 {preInput('Extra Info','Other Rules & Regulations')}
                 <textarea value={extraInfo} onChange={ev => setExtraInfo(ev.target.value)}/>
+
+                {preInput('Availability Status','Tick mark if Booking Open')}
+                <input type="checkbox" 
+                        checked={status}
+                        onChange={ev => setStatus(ev.target.checked)}
+                        placeholder="Available" />
                 
                 {preInput('Check In & Check Out Times','Add check in & check out timings(24-hour clock format) keeping window for cleaning/maintenance between guests in-mind')}
                 <div className="grid gap-2 grid-cols-2 md:grid-cols-4">

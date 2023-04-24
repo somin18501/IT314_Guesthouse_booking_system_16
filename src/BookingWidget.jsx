@@ -30,7 +30,7 @@ export default function BookingWidget({place}){
 
         if(user !== null){
             if(checkIn.length == 0 || checkOut.length == 0 || numOfGuests.length == 0 || name.length == 0 || phone.length == 0){
-                alert('please enter all the details')
+                alert('please enter all the details correctly')
                 redirect(`/place/${id}`)
             }
             const response = await axios.post('/bookings',{checkIn,checkOut,numOfGuests,name,phone,place:place._id,

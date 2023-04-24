@@ -33,7 +33,7 @@ export default function PlacePage(){
                     </div>
                     {place?.photos?.length > 0 && place.photos.map(photo=>(
                         <div>
-                            <img src={'http://localhost:4000/uploads/'+photo} alt="" />
+                            <img src={'https://drive.google.com/uc?id='+photo} alt="" />
                         </div>
                     ))}
                 </div>
@@ -50,26 +50,27 @@ export default function PlacePage(){
                 </svg>
                 {place.address+", "+place.city+", "+place.state+", "+place.country}
             </a>
+
             <div className="relative">
                 <div className="grid gap-2 grid-cols-[1fr_1fr] rounded-2xl overflow-hidden">
                     <div>
                         {place.photos?.[0] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+place.photos[0]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
                         )}
                     </div>
                     <div>
                         {place.photos?.[1] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+place.photos[1]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+place.photos[1]} alt="" />
                         )}
                     </div>
                     <div>
                         {place.photos?.[2] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+place.photos[2]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+place.photos[2]} alt="" />
                         )}
                     </div>
                     <div>
                         {place.photos?.[3] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+place.photos[3]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+place.photos[3]} alt="" />
                         )}
                     </div>
                 </div>
@@ -80,6 +81,7 @@ export default function PlacePage(){
                     Show All
                 </button>
             </div>
+
             <div className="mt-8 mb-8 grid gap-8 grid-cols-1 md:grid-cols-[2fr_1fr]">
                 <div>
 
@@ -152,14 +154,23 @@ export default function PlacePage(){
                             Max no. of Guests/room: {place.maxGuests}
                         </div>
                     </div>
-
                 </div>
                 
                 <div>
                     <BookingWidget place={place}/>
                 </div>
             </div>
-            <div className="bg-white -mx-8 px-8 py-8 border-t">
+
+            <div className="my-4">
+                <h2 className="font-semibold text-2xl mb-2">Reviews</h2>
+                {place?.feedback?.length > 0 && place.feedback.map(feed=>(
+                    <div className="flex gap-1 item-center">
+                        <li>{feed}</li>
+                    </div>
+                ))}
+            </div>
+
+            <div className="bg-white -mx-8 px-8 py-6 border-t">
                 <div>
                     <h2 className="font-semibold text-2xl">Extra info</h2>
                 </div>

@@ -9,12 +9,20 @@ export default function BookingPage(){
     const [showAll,setShowAll] = useState(false);
     const [currDate,setCurrDate] = useState('');
     const [redirect,setRedirect] = useState(false);
+
+    
+    const [feedback,setFeedback] = useState('');
+    const [addedFeedback,setAddedFeedback] = useState([]);
+    const [placeId,setPlaceId] = useState('');
+
     useEffect(()=>{
         if(!id){
             return;
         }
         axios.get('/bookings/'+id).then(response => {
             setBooking(response.data)
+            setAddedFeedback(response.data.place.feedback);
+            setPlaceId(response.data.place._id);
         })
         let ts = Date.now();
         let date_time = new Date(ts);
@@ -29,6 +37,12 @@ export default function BookingPage(){
             const response = await axios.delete('/deletebooking/'+id);
             setRedirect(`/account/bookings`);
         }
+    }
+
+    async function saveFeedback(ev){
+        ev.preventDefault();
+        await axios.put('/places/feedback', {placeId, feedback:[...addedFeedback, feedback]});
+        setRedirect(`/account/bookings`);
     }
 
     if(redirect) return <Navigate to={redirect}/>
@@ -50,7 +64,7 @@ export default function BookingPage(){
                     </div>
                     {booking.place?.photos?.length > 0 && booking.place.photos.map(photo=>(
                         <div>
-                            <img src={'http://localhost:4000/uploads/'+photo} alt="" />
+                            <img src={'https://drive.google.com/uc?id='+photo} alt="" />
                         </div>
                     ))}
                 </div>
@@ -112,22 +126,22 @@ export default function BookingPage(){
                 <div className="grid gap-2 grid-cols-[1fr_1fr] rounded-2xl overflow-hidden">
                     <div>
                         {booking.place.photos?.[0] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+booking.place.photos[0]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+booking.place.photos[0]} alt="" />
                         )}
                     </div>
                     <div>
                         {booking.place.photos?.[1] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+booking.place.photos[1]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+booking.place.photos[1]} alt="" />
                         )}
                     </div>
                     <div>
                         {booking.place.photos?.[2] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+booking.place.photos[2]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+booking.place.photos[2]} alt="" />
                         )}
                     </div>
                     <div>
                         {booking.place.photos?.[3] && (
-                            <img className="aspect-square object-cover" src={'http://localhost:4000/uploads/'+booking.place.photos[3]} alt="" />
+                            <img className="aspect-square object-cover" src={'https://drive.google.com/uc?id='+booking.place.photos[3]} alt="" />
                         )}
                     </div>
                 </div>
@@ -141,6 +155,13 @@ export default function BookingPage(){
             <div className="mt-6">
                 {differenceInCalendarDays(new Date(booking.checkIn), new Date(currDate))>1 && (
                     <button className="primary" onClick={cancelBooking}>Cancel</button>
+                )}
+
+                {differenceInCalendarDays(new Date(currDate),new Date(booking.checkOut))<=7 && differenceInCalendarDays(new Date(currDate),new Date(booking.checkOut))>0 && (
+                    <form onSubmit={saveFeedback}>
+                        <textarea placeholder="Please give your valueable feedback for Guesthouse" value={feedback} onChange={ev => setFeedback(ev.target.value)}/>
+                        <button className="primary">Submit Feedback</button>
+                    </form>
                 )}
             </div>
         </div>
