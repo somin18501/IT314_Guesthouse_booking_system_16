@@ -109,14 +109,15 @@ const jwtSecret = "bjhfewf74926966jheufuf";
 
 app.use(express.json()); // to parse the json to read data
 app.use(cookieParser());
-app.use("/uploads", express.static(__dirname + "/uploads"));
-app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(
   cors({
     credentials: true,
     origin: process.env.CLIENT_URL,
   })
 );
+
+
 
 mongoose.connect(process.env.MONGO_URL);
 
@@ -348,3 +349,6 @@ app.delete('/deletebooking/:id', async(req,res)=>{
 })
 
 app.listen(4000);
+
+console.log("Server is running on port 4000");
+module.exports = app;
