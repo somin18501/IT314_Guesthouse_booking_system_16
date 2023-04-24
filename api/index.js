@@ -92,6 +92,8 @@ async function generatepublicurl(id) {
 
     const result = await drive.files.get({
       fileId: fileId,
+      
+      
       fields: "webViewLink, webContentLink",
     });
     console.log(result.data);
