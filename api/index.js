@@ -1,25 +1,17 @@
-const { urlencoded } = require("express");
 const express = require("express");
-const User = require("./models/User");
-const imagedownloader = require("image-downloader");
-const jwt = require("jsonwebtoken");
-const multer = require('multer');
-
-const cookieParser = require("cookie-parser");
-require("dotenv").config();
-
-
-const bcrypt = require("bcryptjs");
-
+const cors = require("cors");
 const mongoose = require("mongoose");
-
-
-const cors = require('cors')
-
-
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("./models/User.js");
+const Place = require("./models/place.js");
+const Booking = require("./models/Booking.js");
+const cookieParser = require("cookie-parser");
+const imageDownloader = require("image-downloader");
+const multer = require("multer");
+const fs = require("fs");
+require("dotenv").config();
 const app = express();
-
 
 let { google } = require("googleapis");
 let path = require("path");
