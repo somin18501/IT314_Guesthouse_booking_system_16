@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function IndexPage(){
     const [places,setPlaces] = useState([]);
-    const [sortState, setSortState] = useState('price');
+    const [sortState, setSortState] = useState('title');
     
     function doSort(a,b){
         if(sortState == 'price'){
