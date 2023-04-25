@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User.js");
-const Place = require("./models/place.js");
+const Place = require("./models/Place.js");
 const Booking = require("./models/Booking.js");
 const cookieParser = require("cookie-parser");
 const imageDownloader = require("image-downloader");
@@ -12,7 +12,6 @@ const multer = require("multer");
 const fs = require("fs");
 require("dotenv").config();
 const app = express();
-
 
 let { google } = require("googleapis");
 let path = require("path");
@@ -39,7 +38,7 @@ const drive = google.drive({
 });
 
 // works perfectly
-let uploadids;
+let uploadids = 'undefined';
 async function uploadfile(filepath) {
   console.log(filepath);
   if (path.extname(filepath) == ".png") {
@@ -92,8 +91,6 @@ async function generatepublicurl(id) {
 
     const result = await drive.files.get({
       fileId: fileId,
-      
-      
       fields: "webViewLink, webContentLink",
     });
     console.log(result.data);
@@ -102,24 +99,19 @@ async function generatepublicurl(id) {
   }
 }
 
-
-
-
-
 const bcryptSalt = bcrypt.genSaltSync(10);
 const jwtSecret = "bjhfewf74926966jheufuf";
 
 app.use(express.json()); // to parse the json to read data
 app.use(cookieParser());
-app.use('/uploads', express.static(__dirname + '/uploads'));
+app.use("/uploads", express.static(__dirname + "/uploads"));
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     credentials: true,
-    origin: 'https://frontend-sar7.onrender.com',
+    origin: "https://frontend-sar7.onrender.com",
   })
 );
-
-
 
 mongoose.connect(process.env.MONGO_URL);
 
@@ -207,10 +199,13 @@ app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
     const parts = originalname.split(".");
     const ext = parts[parts.length - 1];
     const newName = path + "." + ext;
+    console.log(newName);
     fs.renameSync(path, newName);
+    // console.log(newName);
     await uploadfile('E:'+newName);
     await generatepublicurl(uploadids);
-    uploadedFiles.push(uploadids);
+    if(uploadids != 'undefined')  uploadedFiles.push(uploadids);
+    uploadids = 'undefined';
   }
   res.json(uploadedFiles);
 });
@@ -337,7 +332,6 @@ app.get('/bookings',(req,res)=>{
   });
 })
 
-
 app.get("/bookings/:id", async (req, res) => {
   const { id } = req.params;
   res.json(await Booking.findById(id).populate('place'));
@@ -352,6 +346,4 @@ app.delete('/deletebooking/:id', async(req,res)=>{
 })
 
 app.listen(4000);
-
-console.log("Server is running on port 4000");
-module.exports = app;
+// ImFW5c2w5dNjVqrN
