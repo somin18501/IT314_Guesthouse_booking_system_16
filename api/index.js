@@ -404,6 +404,11 @@ app.delete("/deletebooking/:id", async (req, res) => {
   }
 });
 
+
+
+
+// payment gateway
+
 app.post("/payment", async (req, res) => {
 	let { amount, id } = req.body
 	try {
