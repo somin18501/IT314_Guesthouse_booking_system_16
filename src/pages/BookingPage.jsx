@@ -36,6 +36,7 @@ export default function BookingPage(){
         if(confirm("Sure? want to Cancel Booking") == true){
             const response = await axios.delete('/deletebooking/'+id);
             setRedirect(`/account/bookings`);
+            alert('Payment will be refunded in 24 hrs');
         }
     }
 

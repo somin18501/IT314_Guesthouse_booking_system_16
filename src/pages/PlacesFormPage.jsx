@@ -76,15 +76,20 @@ export default function PlacesFormPage(){
             addedPhotos, description, perks, extraInfo, 
             checkIn, checkOut, maxGuests, price, status,
         };
-        if(id){ 
-            // update place with given id
-            // here to add id at begenning we are adding placedata in such way 
-            await axios.put('/places', {id, ...placeData});
-            setRedirect(true);
-        }else{
-            // new place place
-            await axios.post('/places', placeData);
-            setRedirect(true);
+        if(title.length != 0 && address.length !=0 && city.length !=0 && state.length != 0 && country.length != 0 && addedPhotos.length >0 && checkIn.length !=0 && checkOut.length !=0 && maxGuests > 0 && price > 0){
+            if(id){ 
+                // update place with given id
+                // here to add id at begenning we are adding placedata in such way 
+                await axios.put('/places', {id, ...placeData});
+                setRedirect(true);
+            }else{
+                // new place place
+                await axios.post('/places', placeData);
+                setRedirect(true);
+            }
+        }
+        else{
+            alert('Please enter all details properly');
         }
     }
 

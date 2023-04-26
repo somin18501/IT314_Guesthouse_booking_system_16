@@ -21,3 +21,11 @@ button.primary{
     background-color: #1532F1;
     @apply bg-primary p-2 w-full text-white rounded-2xl;
 }
+
+.StripeElement{
+    display: block;
+    margin: 10px 0 10px 0;
+    padding: 10px 10px;
+    border: 2px solid #1532F1;
+    border-radius: 10px;
+}

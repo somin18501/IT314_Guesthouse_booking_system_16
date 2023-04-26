@@ -23,9 +23,7 @@ export default function PhotosUploader({addedPhotos,onChange}){
         for(let i=0;i<files.length;i++){
             data.append('photos', files[i]);
         }
-        axios.post('/upload', data, { 
-            headers: {'Content-type':'multipart/form-data'}
-        }).then(response => { // we can use .then instead of async-await
+        axios.post('/upload', data, { headers: {'Content-type':'multipart/form-data'}}).then(response => { // we can use .then instead of async-await
             const {data:filenames} = response; // because response will be an array
             onChange(prev => {
                 return [...prev, ...filenames];
