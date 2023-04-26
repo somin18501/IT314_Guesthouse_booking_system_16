@@ -33,14 +33,17 @@ const oauth2client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
+//oauth credentials needed to operate in gdrive space
 oauth2client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
 
 const drive = google.drive({
   version: "v3",
   auth: oauth2client,
 });
 
-// works perfectly
+
+// used to upload file to google drive based on mimetype
 let uploadids = "undefined";
 async function uploadfile(filepath) {
   console.log(filepath);
@@ -81,6 +84,8 @@ async function uploadfile(filepath) {
   }
 }
 
+
+//creates a public url for view/download access for any user and changes file permissions
 async function generatepublicurl(id) {
   try {
     const fileId = id;
@@ -102,15 +107,16 @@ async function generatepublicurl(id) {
   }
 }
 
+
+//bcrypt salt to encrypt user password
 const bcryptSalt = bcrypt.genSaltSync(10);
 const jwtSecret = "bjhfewf74926966jheufuf";
 
+
 app.use(express.json()); // to parse the json to read data
-app.use(cookieParser());
-
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-
+app.use(cookieParser()); // to read data of browser cookies
+app.use(bodyParser.json()) // parses body into readable JSON object
+app.use(bodyParser.urlencoded({ extended: true })) // needed to read body of http responses
 app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -121,13 +127,15 @@ app.use(
 );
 
 
-
+//establish mongoose connection
 mongoose.connect(process.env.MONGO_URL);
 
 app.get("/test", (req, res) => {
   res.json("test ok");
 });
 
+
+//register page to register credentials of a user in system for login
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
   try {
@@ -142,6 +150,8 @@ app.post("/register", async (req, res) => {
   }
 });
 
+
+//for login using user credentials
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const userDoc = await User.findOne({ email });
@@ -169,6 +179,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
+
+//profile page of loggedin user, not accessible without login
 app.get("/profile", (req, res) => {
   const { token } = req.cookies;
   if (token) {
@@ -182,12 +194,15 @@ app.get("/profile", (req, res) => {
   }
 });
 
+
+//logout
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json(true);
 });
 
-// console.log({__dirname}) // used to get value in terminal
 
+// console.log({__dirname}) // used to get value in terminal
+//upload photos of a guesthouse by image address link
 app.post("/upload-by-link", async (req, res) => {
   const { link } = req.body;
   const newName = "photo" + Date.now() + ".jpg";
@@ -201,6 +216,8 @@ app.post("/upload-by-link", async (req, res) => {
   res.json(uploadids);
 });
 
+
+//takes care of what photo is uploaded, stores id for future access and uploads it to cloud storage
 const photosMiddleware = multer({ dest: "uploads/" });
 app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
   // console.log(req.files); // used to gt response in terminal
@@ -221,6 +238,8 @@ app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
   res.json(uploadedFiles);
 });
 
+
+//carousal of all the available places
 app.post("/places", (req, res) => {
   const { token } = req.cookies;
   const {
@@ -262,6 +281,8 @@ app.post("/places", (req, res) => {
   });
 });
 
+
+//shows places owned by users
 app.get("/user-places", async (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
@@ -270,11 +291,15 @@ app.get("/user-places", async (req, res) => {
   });
 });
 
+
+//view a specific guesthouse
 app.get("/places/:id", async (req, res) => {
   const { id } = req.params;
   res.json(await Place.findById(id));
 });
 
+
+//adds a new guesthouse and shows it inside the publishers accomodations
 app.put("/places", async (req, res) => {
   const { token } = req.cookies;
   const {
@@ -321,6 +346,8 @@ app.put("/places", async (req, res) => {
   });
 });
 
+
+//feedback area to read reviews for each guesthouse
 app.put("/places/feedback", async (req, res) => {
   const { placeId, feedback } = req.body;
   const placeDoc = await Place.findById(placeId);
@@ -331,6 +358,8 @@ app.put("/places/feedback", async (req, res) => {
   res.json("ok");
 });
 
+
+//request to delete a certain guesthouse
 app.delete("/deleteplace/:id", async (req, res) => {
   try {
     res.json(await Place.findByIdAndDelete(req.params.id));
@@ -339,6 +368,8 @@ app.delete("/deleteplace/:id", async (req, res) => {
   }
 });
 
+
+//show carousal of places according to query of location/place
 app.get("/places", async (req, res) => {
   const { city, state, country } = req.query;
   const queryObject = {};
@@ -357,11 +388,14 @@ app.get("/places", async (req, res) => {
   res.json(await Place.find(queryObject));
 });
 
+
 app.get("/places", async (req, res) => {
   res.json(await Place.find());
 });
 
+
 // here we can using .then() instead of async-await as substitute
+// booking functionality / accessible only if you are logged in
 app.post("/bookings", (req, res) => {
   const { token } = req.cookies;
   const { place, checkIn, checkOut, numOfGuests, name, phone, price } =
@@ -382,6 +416,8 @@ app.post("/bookings", (req, res) => {
   });
 });
 
+
+//get all your current bookings / accessible only if you are logged in
 app.get("/bookings", (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
@@ -391,11 +427,15 @@ app.get("/bookings", (req, res) => {
   });
 });
 
+
+//shows details regarding a particular booking of a user
 app.get("/bookings/:id", async (req, res) => {
   const { id } = req.params;
   res.json(await Booking.findById(id).populate("place"));
 });
 
+
+//to delete a certain booking
 app.delete("/deletebooking/:id", async (req, res) => {
   try {
     res.json(await Booking.findByIdAndDelete(req.params.id));
@@ -405,10 +445,7 @@ app.delete("/deletebooking/:id", async (req, res) => {
 });
 
 
-
-
-// payment gateway
-
+// payment gateway implementation using stripe
 app.post("/payment", async (req, res) => {
 	let { amount, id } = req.body
 	try {
