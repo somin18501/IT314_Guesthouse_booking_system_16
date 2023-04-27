@@ -10,7 +10,6 @@ export default function BookingPage(){
     const [currDate,setCurrDate] = useState('');
     const [redirect,setRedirect] = useState(false);
 
-    
     const [feedback,setFeedback] = useState('');
     const [addedFeedback,setAddedFeedback] = useState([]);
     const [placeId,setPlaceId] = useState('');
@@ -48,7 +47,6 @@ export default function BookingPage(){
 
     if(redirect) return <Navigate to={redirect}/>
 
-    // doubt of about this line
     if(!booking) return '';
     
     if(showAll){
@@ -123,7 +121,7 @@ export default function BookingPage(){
                     </div>
                 </div>
             </div>
-            <div className="relative">
+            <div className="relative bg-gray-200 my-6 rounded-2xl">
                 <div className="grid gap-2 grid-cols-[1fr_1fr] rounded-2xl overflow-hidden">
                     <div>
                         {booking.place.photos?.[0] && (
@@ -159,10 +157,13 @@ export default function BookingPage(){
                 )}
 
                 {differenceInCalendarDays(new Date(currDate),new Date(booking.checkOut))<=7 && differenceInCalendarDays(new Date(currDate),new Date(booking.checkOut))>0 && (
-                    <form onSubmit={saveFeedback}>
-                        <textarea placeholder="Please give your valueable feedback for Guesthouse" value={feedback} onChange={ev => setFeedback(ev.target.value)}/>
-                        <button className="primary">Submit Feedback</button>
-                    </form>
+                    <div className="mt-5">
+                        <h2 className="text-2xl mt-4 font-bold">FeedBack Please</h2>
+                        <form onSubmit={saveFeedback}>
+                            <textarea className="rounded-2xl" placeholder="Please give your valueable feedback for Guesthouse within 7 days of check out" value={feedback} onChange={ev => setFeedback(ev.target.value)}/>
+                            <button className="primary">Submit Feedback</button>
+                        </form>
+                    </div>
                 )}
             </div>
         </div>

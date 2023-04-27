@@ -1,5 +1,6 @@
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import axios from "axios"
+import { format } from "date-fns"
 import React, { useState } from 'react'
 import { Navigate } from "react-router-dom"
 
@@ -85,8 +86,8 @@ export default function PaymentFormPage({book,pid,onChange}) {
         <div>
             <div className="p-2">
                 <b>Booking Id:</b> {book._id} <br />
-                <b>check In:</b> {book.checkIn} <br />
-                <b>check Out:</b> {book.checkOut} <br />
+                <b>check In:</b> {format(new Date(book.checkIn),"yyyy-MM-dd")} <br />
+                <b>check Out:</b> {format(new Date(book.checkOut),"yyyy-MM-dd")} <br />
                 <b>No. of Guests:</b> {book.numOfGuests} <br />
                 <b>name:</b> {book.numOfGuests} <br />
                 <b>phone:</b> {book.numOfGuests} <br />
