@@ -1,10 +1,9 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
 import axios from "axios";
-import { Link, Navigate } from "react-router-dom";
 import { UserContext } from "./UserContext";
 import StripeContainer from "./pages/StripeContainer";
-// import { useParams } from "react-router-dom";
+
 export default function BookingWidget({place}){
     const [checkIn,setCheckIn] = useState('');
     const [checkOut,setCheckOut] = useState('');
@@ -15,12 +14,11 @@ export default function BookingWidget({place}){
     const [book,setbook] = useState(null);
     const {user} = useContext(UserContext);
     
-    // No idea why it is not working
-    // useEffect(()=>{
-    //     if(user){
-    //         setName(user.name);
-    //     }
-    // }, [user]);
+    useEffect(()=>{
+        if(user){
+            setName(user.name);
+        }
+    }, [user]);
     
     let numberOfNights = 0;
     if(checkIn && checkOut){
