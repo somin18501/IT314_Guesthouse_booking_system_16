@@ -9,7 +9,7 @@ export default function RegisterPage(){
     async function registerUser(ev){
         ev.preventDefault();
         try{
-            if(name.length != 0 && email.length != 0 && password.length !=0){
+            if(name.length > 0 && email.length > 0 && password.length >= 8){
                 await axios.post('/register',{
                     name,
                     email,
@@ -17,7 +17,7 @@ export default function RegisterPage(){
                 });
                 alert('Registration successfull! Login Now');
             } else{
-                alert('Please give all details');
+                alert('Please enter all details correctly');
             }
         }catch (e){
             alert('Registration failed!! Please try again later');

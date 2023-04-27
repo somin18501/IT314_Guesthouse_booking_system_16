@@ -1,6 +1,6 @@
 import axios from "axios";
 import { React, useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 export default function FilteredPage(){
     const {str} = useParams();
@@ -8,9 +8,6 @@ export default function FilteredPage(){
     const [places,setPlaces] = useState([]);
     const [places2,setPlaces2] = useState([]);
     const [places3,setPlaces3] = useState([]);
-    const [redirect1,setRedirect1] = useState(false);
-    const [redirect2,setRedirect2] = useState(false);
-    const [redirect3,setRedirect3] = useState(false);
 
     function doSort(a,b){
         if(sortState == 'price'){
@@ -29,31 +26,17 @@ export default function FilteredPage(){
         }
     }
     
-    let tp = false;
     useEffect(()=>{
         axios.get('/places?city='+str).then(response=>{
             setPlaces([...response.data]);
-            if(response.data.length === 0) setRedirect1(true);    
         });
         axios.get('/places?state='+str).then(response=>{
             setPlaces2([...response.data]);
-            if(response.data.length === 0) setRedirect2(true);
         });
         axios.get('/places?country='+str).then(response=>{
             setPlaces3([...response.data]);
-            if(response.data.length === 0) setRedirect3(true);
         });
-        setTimeout(() => {
-            tp=true;
-          }, 1000);
     }, [str]);
-
-    
-    if(tp && redirect1 && redirect2 && redirect3){
-        return <Navigate to={'/'} />;
-    }
-    
-    // if(redirect1) return <Navigate to={'/'} />;
 
     return (
         <div>
@@ -68,15 +51,17 @@ export default function FilteredPage(){
                     if(place.status == true){
                         return(
                     <Link to={'/place/'+place._id}>
-                        <div className="bg-gray-500 mb-2 rounded-2xl flex">
-                            {place.photos?.[0] && (
-                                <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
-                            )}
-                        </div>
-                        <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
-                        <h3 className="text-sm text-gray-500">{place.title}</h3>
-                        <div className="mt-1">
-                            <span className="font-bold">Rs {place.price}/night</span> 
+                        <div className="bg-gray-200 rounded-2xl p-2">
+                            <div className="bg-gray-500 mb-2 rounded-2xl flex">
+                                {place.photos?.[0] && (
+                                    <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
+                                )}
+                            </div>
+                            <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
+                            <h3 className="text-sm text-gray-500">{place.title}</h3>
+                            <div className="mt-1">
+                                <span className="font-bold">Rs {place.price}/night</span> 
+                            </div>
                         </div>
                     </Link>)
                 }})}
@@ -84,15 +69,17 @@ export default function FilteredPage(){
                     if(place.status == true){
                         return(
                     <Link to={'/place/'+place._id}>
-                        <div className="bg-gray-500 mb-2 rounded-2xl flex">
-                            {place.photos?.[0] && (
-                                <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
-                            )}
-                        </div>
-                        <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
-                        <h3 className="text-sm text-gray-500">{place.title}</h3>
-                        <div className="mt-1">
-                            <span className="font-bold">Rs {place.price}/night</span> 
+                        <div className="bg-gray-200 rounded-2xl p-2">
+                            <div className="bg-gray-500 mb-2 rounded-2xl flex">
+                                {place.photos?.[0] && (
+                                    <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
+                                )}
+                            </div>
+                            <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
+                            <h3 className="text-sm text-gray-500">{place.title}</h3>
+                            <div className="mt-1">
+                                <span className="font-bold">Rs {place.price}/night</span> 
+                            </div>
                         </div>
                     </Link>)
                 }})}
@@ -100,15 +87,17 @@ export default function FilteredPage(){
                     if(place.status == true){
                         return(
                     <Link to={'/place/'+place._id}>
-                        <div className="bg-gray-500 mb-2 rounded-2xl flex">
-                            {place.photos?.[0] && (
-                                <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
-                            )}
-                        </div>
-                        <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
-                        <h3 className="text-sm text-gray-500">{place.title}</h3>
-                        <div className="mt-1">
-                            <span className="font-bold">Rs {place.price}/night</span> 
+                        <div className="bg-gray-200 rounded-2xl p-2">
+                            <div className="bg-gray-500 mb-2 rounded-2xl flex">
+                                {place.photos?.[0] && (
+                                    <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
+                                )}
+                            </div>
+                            <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
+                            <h3 className="text-sm text-gray-500">{place.title}</h3>
+                            <div className="mt-1">
+                                <span className="font-bold">Rs {place.price}/night</span> 
+                            </div>
                         </div>
                     </Link>)
                 }})}

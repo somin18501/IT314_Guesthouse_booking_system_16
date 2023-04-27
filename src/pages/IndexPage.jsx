@@ -42,15 +42,17 @@ export default function IndexPage(){
                     if(place.status == true){
                         return (
                         <Link to={'/place/'+place._id}>
-                            <div className="bg-gray-500 mb-2 rounded-2xl flex">
-                                {place.photos?.[0] && (
-                                    <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
-                                )}
-                            </div>
-                            <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
-                            <h3 className="text-sm text-gray-500">{place.title}</h3>
-                            <div className="mt-1">
-                                <span className="font-bold">Rs {place.price}/night</span> 
+                            <div className="bg-gray-200 rounded-2xl p-2">
+                                <div className="bg-gray-500 mb-2 rounded-2xl flex">
+                                    {place.photos?.[0] && (
+                                        <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
+                                    )}
+                                </div>
+                                <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
+                                <h3 className="text-sm text-gray-500">{place.title}</h3>
+                                <div className="mt-1">
+                                    <span className="font-bold">Rs {place.price}/night</span> 
+                                </div>
                             </div>
                         </Link>)
                     }})}
