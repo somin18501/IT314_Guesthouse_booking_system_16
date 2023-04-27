@@ -19,5 +19,7 @@ We have used open-source MERN (MongoDB, ExpressJS, ReactJS and NodeJS) stack for
 <li> <b>Lab-2:</b> Identified the functional and non-functional requirements of the project and finalized the project model to be used in the course.  </li>
 <li> <b>Lab-3:</b> Made the use-case diagram and stated the relationships between the actors and the use cases. Documented the use case textual description for each use case. Justified the non-functional requirements.</li>
 <li> <b>Lab-4:</b> Finalized the tool, frameworks and technologies to be used for the project. Effort estimation using Use case size point. </li>
-<li> <b>Lab-6:</b> Developed Domain analysis model, sequence diagram, class diagram, identified the design goals, entity obejects, boundary objects and control objects. </li>
+<li> <b>Lab-6:</b> Developed Domain analysis model, sequence diagram, class diagram, identified the design goals, entity obejects, boundary objects and control objects. 
+</li>
+  <li> <b>Lab-8:</b> Unit testing was carried out using the Jest framework as our project is implemented in Node JS.
 </ul>
