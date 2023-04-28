@@ -23,3 +23,14 @@ We have used open-source MERN (MongoDB, ExpressJS, ReactJS and NodeJS) stack for
 </li>
   <li> <b>Lab-8:</b> Unit testing was carried out using the Jest framework as our project is implemented in Node JS.
 </ul>
+
+
+### Testing:<br>
+We have carried out various testings of our software:
+
+1. Unit testing - also known as white box testing. In this, the tester knows the internal implementation of the software and carries testing module-wise. Using this can detect all the bugs in a specific module.
+2. System testing - also known as black box testing. Here we only check for the behaviour of the system as whole, and not worry about the internal implementation of the software. Corresponding to an input we match the expected output and the actual output.
+3. GUI testing - it is the process for ensuring proper functionality of the graphical user interface (GUI) for a specific application.GUI testing generally evaluates a design of elements such as layout, colors, fonts, font sizes, labels, text boxes, text formatting, captions, buttons, lists, icons, links, and content. 
+4. Static Analysis - it involves a set of methods used to analyze software source code determine how the software functions and establish criteria to check its correctness. Static analysis studies the source code without executing it and reveals a wide variety of information such as the structure of the model used, data and control flow, syntax accuracy, and more.
+5. Non-functional testing - it tests non-functional parameters such as reliability, load test, performance and accountability of the software. It is designed to test the readiness of a system as per nonfunctional parameters which are never addressed by functional testing.
+6. Acceptance testing - This is the final stage of testing before the product goes live. Here the end-users are kept in mind and testing is been carried out. If the action does the anticipated task, it is accepted else not.
