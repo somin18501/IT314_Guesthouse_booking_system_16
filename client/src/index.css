@@ -2,8 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-input[type="text"],input[type="password"],input[type="email"]{
+input[type="text"],input[type="password"],
+input[type="email"],input[type="number"],
+input[type="time"],input[type="tel"],
+textarea{
     @apply w-full border my-1 py-2 px-3 rounded-xl;
+}
+textarea{
+    height: 140px;
+}
+input[type="search"]{
+    @apply w-full py-1 px-1 rounded-xl;
 }
 button{
     @apply bg-gray-300;
@@ -11,4 +20,12 @@ button{
 button.primary{
     background-color: #1532F1;
     @apply bg-primary p-2 w-full text-white rounded-2xl;
+}
+
+.StripeElement{
+    display: block;
+    margin: 10px 0 10px 0;
+    padding: 10px 10px;
+    border: 2px solid #1532F1;
+    border-radius: 10px;
 }
