@@ -9,12 +9,19 @@ export default function BookingPage(){
     const [showAll,setShowAll] = useState(false);
     const [currDate,setCurrDate] = useState('');
     const [redirect,setRedirect] = useState(false);
+
+    const [feedback,setFeedback] = useState('');
+    const [addedFeedback,setAddedFeedback] = useState([]);
+    const [placeId,setPlaceId] = useState('');
+
     useEffect(()=>{
         if(!id){
             return;
         }
         axios.get('/bookings/'+id).then(response => {
             setBooking(response.data)
+            setAddedFeedback(response.data.place.feedback);
+            setPlaceId(response.data.place._id);
         })
         let ts = Date.now();
         let date_time = new Date(ts);
@@ -28,7 +35,14 @@ export default function BookingPage(){
         if(confirm("Sure? want to Cancel Booking") == true){
             const response = await axios.delete('/deletebooking/'+id);
             setRedirect(`/account/bookings`);
+            alert('Payment will be refunded in 24 hrs');
         }
+    }
+
+    async function saveFeedback(ev){
+        ev.preventDefault();
+        await axios.put('/places/feedback', {placeId, feedback:[...addedFeedback, feedback]});
+        setRedirect(`/account/bookings`);
     }
 
     if(redirect) return <Navigate to={redirect}/>
@@ -108,7 +122,7 @@ export default function BookingPage(){
                     </div>
                 </div>
             </div>
-            <div className="relative">
+            <div className="relative bg-gray-200 my-6 rounded-2xl">
                 <div className="grid gap-2 grid-cols-[1fr_1fr] rounded-2xl overflow-hidden">
                     <div>
                         {booking.place.photos?.[0] && (
@@ -141,6 +155,16 @@ export default function BookingPage(){
             <div className="mt-6">
                 {differenceInCalendarDays(new Date(booking.checkIn), new Date(currDate))>1 && (
                     <button className="primary" onClick={cancelBooking}>Cancel</button>
+                )}
+
+                {differenceInCalendarDays(new Date(currDate),new Date(booking.checkOut))<=7 && differenceInCalendarDays(new Date(currDate),new Date(booking.checkOut))>0 && (
+                    <div className="mt-5">
+                        <h2 className="text-2xl mt-4 font-bold">FeedBack Please</h2>
+                        <form onSubmit={saveFeedback}>
+                            <textarea className="rounded-2xl" placeholder="Please give your valueable feedback for Guesthouse within 7 days of check out" value={feedback} onChange={ev => setFeedback(ev.target.value)}/>
+                            <button className="primary">Submit Feedback</button>
+                        </form>
+                    </div>
                 )}
             </div>
         </div>

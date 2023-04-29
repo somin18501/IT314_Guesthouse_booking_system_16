@@ -23,7 +23,7 @@ export default function PlacesPage(){
             </div>
             <div className="mt-4">
                 {places.length > 0 && places.map(place=>(
-                    <Link to={'/account/places/'+place._id} className="flex cursor-pointer gap-4 bg-gray-100 p-4 rounded-2xl">
+                    <Link to={'/account/places/'+place._id} className="flex my-2 cursor-pointer gap-4 bg-gray-200 p-4 rounded-2xl">
                         <div className="flex w-32 h-32 bg-gray-300 grow shrink-0">
                             {place.photos.length > 0 && (
                                 <img className="object-cover" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />

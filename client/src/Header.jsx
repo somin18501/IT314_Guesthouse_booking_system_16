@@ -9,13 +9,14 @@ export default function Header(){
     return(
         <header className='flex justify-between'>
             <Link to={'/'} className='flex item-center gap-2'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-9 h-9 -rotate-90">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="mt-1 w-9 h-9 -rotate-90">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
-            <span className='font-bold text-2xl'>GHB</span>
+            <span className='mt-2 font-bold text-2xl'>BookMyHouse</span>
             </Link>
             <div className='flex gap-2 border border-gray-300 rounded-full py-2 px-4 shadow-md shadow-gray-300'>
-            <input type="search" 
+            <input className="text-center"
+                   type="search" 
                    value={filter}
                    onChange={ev => setFilter(ev.target.value)}
                    placeholder="Anywhere" />
@@ -25,7 +26,7 @@ export default function Header(){
                 </svg>
             </Link>
             </div>
-            <Link to={user?'/account':'/login'} className='flex items-center gap-2 border border-gray-300 rounded-full py-2 px-4'>
+            <Link to={user?'/account':'/login'} className='flex items-center gap-2 border border-gray-300 rounded-full py-2 px-4 shadow-md shadow-gray-300'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
@@ -35,7 +36,7 @@ export default function Header(){
                 </svg>
             </div>
             {!!user && (
-                <div>
+                <div className="">
                     {user.name}
                 </div>
             )}
