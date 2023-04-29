@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User.js");
-const Place = require("./models/place.js");
+const Place = require("./models/Place.js");
 const Booking = require("./models/Booking.js");
 const cookieParser = require("cookie-parser");
 const imageDownloader = require("image-downloader");
@@ -12,17 +12,21 @@ const multer = require("multer");
 const fs = require("fs");
 require("dotenv").config();
 const app = express();
+let alert = require('alert');
+
+const stripe = require("stripe")(process.env.STRIPE_SECRET_TEST)
+const bodyParser = require("body-parser")
 
 let { google } = require("googleapis");
 let path = require("path");
 // let fs = require("fs");
 const { file } = require("googleapis/build/src/apis/file");
 let CLIENT_ID =
-  "864785856564-r3lg3kfi0gmaa6i53kd89j41ahofr706.apps.googleusercontent.com";
-let CLIENT_SECRET = "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";
+  "263956149914-1qea1778vgtlshv6rfh2sgmiljou2o75.apps.googleusercontent.com";
+let CLIENT_SECRET = "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";
 let REDIRECT_URI = "https://developers.google.com/oauthplayground/";
 let REFRESH_TOKEN =
-  "1//04EkoHi8WuGt3CgYIARAAGAQSNwF-L9IrMNAAZNtusKbnS9AWUdSpPI77lNVyGQ2YEGdjMGvK6rqJytFHZePObYmRwOFQnOgL2qc";
+  "1//04td9E6vGC6Z2CgYIARAAGAQSNwF-L9IrEcZotXIehgF9Tm2rcDdHAYdYUCqfTpVARgJodCsn322WNCiXPXtEx8HF_zOH__uDyTU";
 
 const oauth2client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -37,33 +41,8 @@ const drive = google.drive({
   auth: oauth2client,
 });
 
-// token generation
-function createToken(id) {
-  return jwt.sign({ id }, `${String(id)}is a secret`, {
-    expiresIn: 24 * 60 * 60
-  })
-}
-
-function authenticate(req, res, next) {
-  const token = req.cookies.jwt;
-  if (token) {
-    const user_ID = jwt.decode(req.cookies.jwt).id;
-    jwt.verify(token, `${String(user_ID)}is a secret`, (err, decodedToken) => {
-      if (err) {
-        res.cookie('redirect', true);
-        res.redirect('/login');
-      }
-      else {
-        next();
-      }
-    })
-  }
-  else {
-    res.redirect('/profile');
-  }
-}
 // works perfectly
-let uploadids = 'undefined';
+let uploadids = "undefined";
 async function uploadfile(filepath) {
   console.log(filepath);
   if (path.extname(filepath) == ".png") {
@@ -129,45 +108,61 @@ const jwtSecret = "bjhfewf74926966jheufuf";
 
 app.use(express.json()); // to parse the json to read data
 app.use(cookieParser());
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+
 app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    credentials: true,
-    origin: "https://frontend-sar7.onrender.com",
-  })
-);
+// app.use(
+//   cors({
+//     credentials: true,
+//     origin: "http://127.0.0.1:5173",
+//   })
+// );
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5173');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
 mongoose.connect(process.env.MONGO_URL);
 
 app.get("/test", (req, res) => {
   res.json("test ok");
 });
-// app.get('/',authenticate, async (req,res)=>{
-//   const user_ID = jwt.decode(req.cookies.jwt).id;
-//   const result = await User.findById(user_ID);
-  
-//   // res.redirect(`user/${result.username}`);
-// })
 
-app.post("/register", async (req, res) => { 
+app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
-  try {
-    const userDoc = await User.create({
-      name,
-      email,
-      password: bcrypt.hashSync(password, bcryptSalt),
-    });
-    res.json(userDoc);
-  } catch (e) {
-    res.status(422).json(e);
+  const userDoc = await User.findOne({email});
+  if(userDoc){
+    alert('email already exist');
+    return;
+  }
+  else{
+    try {
+      const userDoc = await User.create({
+        name,
+        email,
+        password: bcrypt.hashSync(password, bcryptSalt),
+      });
+      res.json(userDoc);
+    } catch (e) {
+      res.status(422).json(e);
+    }
   }
 });
 
-app.post("/login",async (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  const userDoc = await User.findOne({ email })
-
+  const userDoc = await User.findOne({ email });
   if (userDoc) {
     const passOk = bcrypt.compareSync(password, userDoc.password);
     if (passOk) {
@@ -177,12 +172,12 @@ app.post("/login",async (req, res) => {
           id: userDoc._id,
         },
         jwtSecret,
-        {},
+        {}, // flag
         (err, token) => {
           if (err) throw err;
-          res.cookie("token", token, { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, secure: false }).json(userDoc);
+          res.cookie("token", token);
+          res.json(userDoc);
         }
-
       );
     } else {
       res.status(422).json("pass not ok");
@@ -190,51 +185,10 @@ app.post("/login",async (req, res) => {
   } else {
     res.json("not found");
   }
-
-
-  // const user = await User.findOne({ email });
-  // let result = {
-  //     user_ID: null,
-  //     error:{
-  //         username : {
-  //             message : "",
-  //             status : false
-  //         },
-  //         password : {
-  //             message : "",
-  //             status : false
-  //         }
-  //     }
-  // }
-  // if (user) {
-  //   const password = await bcrypt.compare(req.body.password, user.password);
-  //   console.log(user);
-
-  //   if (password) {
-  //     const token = createToken(user._id);
-  //     console.log(token);
-  //     res.cookie('jwt', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }).json(user);
-  //     // result.user_ID = user._id;
-  //     // res.status(200).json(result);
-  //   }
-  //   else {
-  //     // result.error.password.status = true;
-  //     // result.error.password.message = "Password doesn't match";
-  //     res.status(404).json("Password doesn't match");
-  //   }
-  // }
-  // else {
-  //   // result.error.username.status = true;
-  //   // result.error.username.message = "User doesn't exist";
-  
-  //   console.log(user);
-  //   res.status(404).json("Password doesn't match");
-  // }
 });
 
 app.get("/profile", (req, res) => {
   const { token } = req.cookies;
-  // console.log(token);
   if (token) {
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
@@ -257,14 +211,15 @@ app.post("/upload-by-link", async (req, res) => {
   const newName = "photo" + Date.now() + ".jpg";
   await imageDownloader.image({
     url: link,
-    dest: '/tmp/' + newName,
+    // dest: "/tmp/" + newName,
+    dest: __dirname + "/uploads/" + newName,
   });
-  await uploadfile('E:\\tmp\\' + newName);
+  await uploadfile("./uploads/" + newName);
   await generatepublicurl(uploadids);
   res.json(uploadids);
 });
 
-const photosMiddleware = multer({ dest: "/tmp" });
+const photosMiddleware = multer({ dest: "uploads/" });
 app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
   // console.log(req.files); // used to gt response in terminal
   const uploadedFiles = [];
@@ -276,9 +231,9 @@ app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
     console.log(newName);
     fs.renameSync(path, newName);
     // console.log(newName);
-    await uploadfile('E:' + newName);
+    await uploadfile('.\\'+newName);
     await generatepublicurl(uploadids);
-    if (uploadids != 'undefined') uploadedFiles.push(uploadids);
+    if(uploadids != 'undefined')  uploadedFiles.push(uploadids);
     uploadids = 'undefined';
   }
   res.json(uploadedFiles);
@@ -287,24 +242,45 @@ app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
 app.post("/places", (req, res) => {
   const { token } = req.cookies;
   const {
-    title, address, city, state, country,
-    addedPhotos, description, perks, extraInfo,
-    checkIn, checkOut, maxGuests, price, status,
+    title,
+    address,
+    city,
+    state,
+    country,
+    addedPhotos,
+    description,
+    perks,
+    extraInfo,
+    checkIn,
+    checkOut,
+    maxGuests,
+    price,
+    status,
   } = req.body;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const placeDoc = await Place.create({
-      owner: userData.id, title, address,
-      city, state, country,
-      photos: addedPhotos, description,
-      perks, extraInfo, checkIn,
-      checkOut, maxGuests, price, status,
+      owner: userData.id,
+      title,
+      address,
+      city,
+      state,
+      country,
+      photos: addedPhotos,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+      price,
+      status,
     });
     res.json(placeDoc);
   });
 });
 
-app.get("/user-places", (req, res) => {
+app.get("/user-places", async (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     const { id } = userData;
@@ -320,9 +296,21 @@ app.get("/places/:id", async (req, res) => {
 app.put("/places", async (req, res) => {
   const { token } = req.cookies;
   const {
-    id, title, address, city, state, country,
-    addedPhotos, description, perks, extraInfo,
-    checkIn, checkOut, maxGuests, price, status,
+    id,
+    title,
+    address,
+    city,
+    state,
+    country,
+    addedPhotos,
+    description,
+    perks,
+    extraInfo,
+    checkIn,
+    checkOut,
+    maxGuests,
+    price,
+    status,
   } = req.body;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
@@ -332,9 +320,20 @@ app.put("/places", async (req, res) => {
     // console.log(placeDoc.owner.toString());
     if (userData.id === placeDoc.owner.toString()) {
       placeDoc.set({
-        title, address, city, state, country,
-        photos: addedPhotos, description, perks, extraInfo,
-        checkIn, checkOut, maxGuests, price, status,
+        title,
+        address,
+        city,
+        state,
+        country,
+        photos: addedPhotos,
+        description,
+        perks,
+        extraInfo,
+        checkIn,
+        checkOut,
+        maxGuests,
+        price,
+        status,
       });
       await placeDoc.save();
       res.json("ok");
@@ -343,7 +342,7 @@ app.put("/places", async (req, res) => {
 });
 
 app.put("/places/feedback", async (req, res) => {
-  const { placeId, feedback, } = req.body;
+  const { placeId, feedback } = req.body;
   const placeDoc = await Place.findById(placeId);
   placeDoc.set({
     feedback,
@@ -352,13 +351,13 @@ app.put("/places/feedback", async (req, res) => {
   res.json("ok");
 });
 
-app.delete('/deleteplace/:id', async (req, res) => {
+app.delete("/deleteplace/:id", async (req, res) => {
   try {
     res.json(await Place.findByIdAndDelete(req.params.id));
   } catch (err) {
-    res.send('Error')
+    res.send("Error");
   }
-})
+});
 
 app.get("/places", async (req, res) => {
   const { city, state, country } = req.query;
@@ -376,47 +375,79 @@ app.get("/places", async (req, res) => {
     queryObject.country = { $regex: country, $options: "i" };
   }
   res.json(await Place.find(queryObject));
-})
+});
 
-app.get('/places', async (req, res) => {
+app.get("/places", async (req, res) => {
   res.json(await Place.find());
 });
 
 // here we can using .then() instead of async-await as substitute
-app.post('/bookings', (req, res) => {
+app.post("/bookings", (req, res) => {
   const { token } = req.cookies;
-  const { place, checkIn, checkOut, numOfGuests,
-    name, phone, price, } = req.body;
+  const { place, checkIn, checkOut, numOfGuests, name, phone, price } =
+    req.body;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const bookingDoc = await Booking.create({
-      user: userData.id, place, checkIn, checkOut,
-      numOfGuests, name, phone, price,
+      user: userData.id,
+      place,
+      checkIn,
+      checkOut,
+      numOfGuests,
+      name,
+      phone,
+      price,
     });
     res.json(bookingDoc);
   });
 });
 
-app.get('/bookings', (req, res) => {
+app.get("/bookings", (req, res) => {
   const { token } = req.cookies;
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     const { id } = userData;
-    // populate is used to get entire object referenced by calling model 
-    res.json(await Booking.find({ user: id }).populate('place'));
+    // populate is used to get entire object referenced by calling model
+    res.json(await Booking.find({ user: id }).populate("place"));
   });
-})
+});
 
 app.get("/bookings/:id", async (req, res) => {
   const { id } = req.params;
-  res.json(await Booking.findById(id).populate('place'));
+  const data = await Booking.findById(id).populate("place");
+  console.log(data)
+  res.json(data);
 });
 
-app.delete('/deletebooking/:id', async (req, res) => {
+app.delete("/deletebooking/:id", async (req, res) => {
   try {
     res.json(await Booking.findByIdAndDelete(req.params.id));
   } catch (err) {
-    res.send('Error')
+    res.send("Error");
   }
+});
+
+app.post("/payment", async (req, res) => {
+	let { amount, id } = req.body
+	try {
+		const payment = await stripe.paymentIntents.create({
+			amount,
+			currency: "INR",
+			description: "GHB",
+			payment_method: id,
+			confirm: true
+		})
+		console.log("Payment", payment)
+		res.json({
+			message: "Payment successful",
+			success: true
+		})
+	} catch (error) {
+		console.log("Error", error)
+		res.json({
+			message: "Payment failed",
+			success: false
+		})
+	}
 })
 
 app.listen(4000);

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/somin18501/IT314_Guesthouse_booking_system_16#readme",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.317.0",
+    "alert": "^5.1.4",
     "axios": "^1.3.4",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
@@ -35,6 +36,7 @@
     "multer": "^1.4.5-lts.1",
     "node-modules": "^1.0.1",
     "nodemon": "^2.0.21",
+    "stripe": "^12.3.0",
     "supertest": "^6.3.3"
   },
   "devDependencies": {
