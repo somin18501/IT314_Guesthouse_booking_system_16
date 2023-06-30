@@ -4,29 +4,26 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User.js");
-const Place = require("./models/Place.js");
+const Place = require("./models/place.js");
 const Booking = require("./models/Booking.js");
 const cookieParser = require("cookie-parser");
 const imageDownloader = require("image-downloader");
 const multer = require("multer");
 const fs = require("fs");
+let session = require("express-session");
 require("dotenv").config();
 const app = express();
-let alert = require('alert');
-
-const stripe = require("stripe")(process.env.STRIPE_SECRET_TEST)
-const bodyParser = require("body-parser")
 
 let { google } = require("googleapis");
 let path = require("path");
 // let fs = require("fs");
 const { file } = require("googleapis/build/src/apis/file");
 let CLIENT_ID =
-  "263956149914-1qea1778vgtlshv6rfh2sgmiljou2o75.apps.googleusercontent.com";
-let CLIENT_SECRET = "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";
+  "864785856564-r3lg3kfi0gmaa6i53kd89j41ahofr706.apps.googleusercontent.com";
+let CLIENT_SECRET = "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";
 let REDIRECT_URI = "https://developers.google.com/oauthplayground/";
 let REFRESH_TOKEN =
-  "1//04td9E6vGC6Z2CgYIARAAGAQSNwF-L9IrEcZotXIehgF9Tm2rcDdHAYdYUCqfTpVARgJodCsn322WNCiXPXtEx8HF_zOH__uDyTU";
+  "1//04EkoHi8WuGt3CgYIARAAGAQSNwF-L9IrMNAAZNtusKbnS9AWUdSpPI77lNVyGQ2YEGdjMGvK6rqJytFHZePObYmRwOFQnOgL2qc";
 
 const oauth2client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -42,7 +39,7 @@ const drive = google.drive({
 });
 
 // works perfectly
-let uploadids = "undefined";
+let uploadids;
 async function uploadfile(filepath) {
   console.log(filepath);
   if (path.extname(filepath) == ".png") {
@@ -108,30 +105,14 @@ const jwtSecret = "bjhfewf74926966jheufuf";
 
 app.use(express.json()); // to parse the json to read data
 app.use(cookieParser());
-
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-
 app.use("/uploads", express.static(__dirname + "/uploads"));
-app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     credentials: true,
     origin: "http://127.0.0.1:5173",
   })
 );
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:5173');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
+app.use(session({ secret: "tempsecret" }));
 
 mongoose.connect(process.env.MONGO_URL);
 
@@ -141,44 +122,51 @@ app.get("/test", (req, res) => {
 
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
-  const userDoc = await User.findOne({email});
-  if(userDoc){
-    alert('email already exist');
-    return;
-  }
-  else{
-    try {
-      const userDoc = await User.create({
-        name,
-        email,
-        password: bcrypt.hashSync(password, bcryptSalt),
-      });
-      res.json(userDoc);
-    } catch (e) {
-      res.status(422).json(e);
-    }
+  try {
+    const userDoc = await User.create({
+      name,
+      email,
+      password: bcrypt.hashSync(password, bcryptSalt),
+    });
+    res.json(userDoc);
+  } catch (e) {
+    res.status(422).json(e);
   }
 });
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
+  req.session.email = email;
+  req.session.password = password;
+  console.log(req.session);
   const userDoc = await User.findOne({ email });
   if (userDoc) {
     const passOk = bcrypt.compareSync(password, userDoc.password);
     if (passOk) {
-      jwt.sign(
+      await jwt.sign(
         {
           email: userDoc.email,
           id: userDoc._id,
         },
         jwtSecret,
-        {}, // flag
+        {},
         (err, token) => {
           if (err) throw err;
-          res.cookie("token", token);
-          res.json(userDoc);
+          // req.session.token = JSON.parse(userDoc);
+          // console.log(req.session);
+          // console.log(token);
+          res.cookie("token", token).json(userDoc);
+          // req.session.token = token;
+          // console.log(req.session);
+          // console.log(token);
+          // console.log(
+          //   typeof req.session.token +
+          //     "cookie token is : " +
+          //     typeof req.cookies.token
+          // );
         }
       );
+      req.session.token = req.cookies.token;
     } else {
       res.status(422).json("pass not ok");
     }
@@ -188,9 +176,15 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-  const { token } = req.cookies;
-  if (token) {
-    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+  // const { token } = req.cookies;
+
+  // console.log(req.cookies);
+  // console.log('token is ' + token);
+  console.log(req.session.token);
+  // console.log(token);
+  if (req.session.token) {
+    jwt.verify(req.session.token, jwtSecret, {}, async (err, userData) => {
+      // jwt.verify(req.session.token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
       const { name, email, _id } = await User.findById(userData.id);
       res.json({ name, email, _id });
@@ -201,6 +195,7 @@ app.get("/profile", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
+  req.session = null;
   res.cookie("token", "").json(true);
 });
 
@@ -211,15 +206,14 @@ app.post("/upload-by-link", async (req, res) => {
   const newName = "photo" + Date.now() + ".jpg";
   await imageDownloader.image({
     url: link,
-    // dest: "/tmp/" + newName,
-    dest: __dirname + "/uploads/" + newName,
+    dest: "/tmp/" + newName,
   });
-  await uploadfile("./uploads/" + newName);
+  await uploadfile("C:\\tmp\\" + newName);
   await generatepublicurl(uploadids);
   res.json(uploadids);
 });
 
-const photosMiddleware = multer({ dest: "uploads/" });
+const photosMiddleware = multer({ dest: "/tmp" });
 app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
   // console.log(req.files); // used to gt response in terminal
   const uploadedFiles = [];
@@ -228,13 +222,10 @@ app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
     const parts = originalname.split(".");
     const ext = parts[parts.length - 1];
     const newName = path + "." + ext;
-    console.log(newName);
     fs.renameSync(path, newName);
-    // console.log(newName);
-    await uploadfile('.\\'+newName);
+    await uploadfile("C:" + newName);
     await generatepublicurl(uploadids);
-    if(uploadids != 'undefined')  uploadedFiles.push(uploadids);
-    uploadids = 'undefined';
+    uploadedFiles.push(uploadids);
   }
   res.json(uploadedFiles);
 });
@@ -257,7 +248,7 @@ app.post("/places", (req, res) => {
     price,
     status,
   } = req.body;
-  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+  jwt.verify(req.session.token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const placeDoc = await Place.create({
       owner: userData.id,
@@ -280,9 +271,9 @@ app.post("/places", (req, res) => {
   });
 });
 
-app.get("/user-places", async (req, res) => {
+app.get("/user-places", (req, res) => {
   const { token } = req.cookies;
-  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+  jwt.verify(req.session.token, jwtSecret, {}, async (err, userData) => {
     const { id } = userData;
     res.json(await Place.find({ owner: id }));
   });
@@ -312,7 +303,7 @@ app.put("/places", async (req, res) => {
     price,
     status,
   } = req.body;
-  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+  jwt.verify(req.session.token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const placeDoc = await Place.findById(id);
     // console.log(userData.id);
@@ -386,7 +377,7 @@ app.post("/bookings", (req, res) => {
   const { token } = req.cookies;
   const { place, checkIn, checkOut, numOfGuests, name, phone, price } =
     req.body;
-  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+  jwt.verify(req.session.token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const bookingDoc = await Booking.create({
       user: userData.id,
@@ -404,7 +395,7 @@ app.post("/bookings", (req, res) => {
 
 app.get("/bookings", (req, res) => {
   const { token } = req.cookies;
-  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+  jwt.verify(req.session.token, jwtSecret, {}, async (err, userData) => {
     const { id } = userData;
     // populate is used to get entire object referenced by calling model
     res.json(await Booking.find({ user: id }).populate("place"));
@@ -413,9 +404,7 @@ app.get("/bookings", (req, res) => {
 
 app.get("/bookings/:id", async (req, res) => {
   const { id } = req.params;
-  const data = await Booking.findById(id).populate("place");
-  console.log(data)
-  res.json(data);
+  res.json(await Booking.findById(id).populate("place"));
 });
 
 app.delete("/deletebooking/:id", async (req, res) => {
@@ -426,29 +415,7 @@ app.delete("/deletebooking/:id", async (req, res) => {
   }
 });
 
-app.post("/payment", async (req, res) => {
-	let { amount, id } = req.body
-	try {
-		const payment = await stripe.paymentIntents.create({
-			amount,
-			currency: "INR",
-			description: "GHB",
-			payment_method: id,
-			confirm: true
-		})
-		console.log("Payment", payment)
-		res.json({
-			message: "Payment successful",
-			success: true
-		})
-	} catch (error) {
-		console.log("Error", error)
-		res.json({
-			message: "Payment failed",
-			success: false
-		})
-	}
-})
-
 app.listen(4000);
-// ImFW5c2w5dNjVqrN
+
+console.log("Server is running on port 4000");
+module.exports = app;
