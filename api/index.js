@@ -117,7 +117,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     credentials: true,
-    origin: "http://127.0.0.1:5173",
+    // origin: "http://127.0.0.1:5173",
+        origin: "https://649e7c8139c225418b349fa2--zesty-custard-3edd83.netlify.app",
   })
 );
 
