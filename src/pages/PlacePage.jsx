@@ -31,11 +31,13 @@ export default function PlacePage(){
                             </svg>
                         </button>
                     </div>
-                    {place?.photos?.length > 0 && place.photos.map(photo=>(
-                        <div>
-                            <img src={'https://drive.google.com/uc?id='+photo} alt="" />
-                        </div>
-                    ))}
+                    <div>
+                        {place?.photos?.length > 0 && place.photos.map(photo=>(
+                            <div className="my-2 flex justify-around">
+                                <img src={'https://drive.google.com/uc?id='+photo} alt="" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );

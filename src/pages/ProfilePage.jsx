@@ -31,8 +31,8 @@ export default function AccountPage(){
             <AccountNav />
             <div className="max-w-lg mx-auto">
                 <div className="bg-gray-200 shadow p-4 rounded-2xl">
-                    Name: {user.name}<br/>
-                    Email: {user.email}<br/>
+                    <b>Name:</b> {user.name}<br/>
+                    <b>Email:</b> {user.email}<br/>
                 </div>
             </div>
             <div className="text-center">

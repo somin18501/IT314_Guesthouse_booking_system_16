@@ -48,6 +48,7 @@ export default function IndexPage(){
                                         <img className="rounded-2xl object-cover aspect-square" src={'https://drive.google.com/uc?id='+place.photos[0]} alt="" />
                                     )}
                                 </div>
+                                <h2 className="font-bold">{place.title}</h2>
                                 <h2 className="font-bold">{place.city+", "+place.state+", "+place.country}</h2>
                                 <h3 className="text-sm text-gray-500">{place.title}</h3>
                                 <div className="mt-1">
